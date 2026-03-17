@@ -16,5 +16,8 @@ public:
   void move(const int width, const int height);
   void pong();
   void draw(sf::RenderWindow& window);
+  bool touchedLeftSide();
+  bool touchedRightSide(const int width);
+  void setPosition(int x, int y);
 };
 
