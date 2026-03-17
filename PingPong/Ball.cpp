@@ -13,19 +13,19 @@ Ball::Ball(int x, int y, int radius) {
 };
 
 void Ball::move(const int width, const int height) {
-  // ïğîâåğêà âûõîäà çà ëåâóş ãğàíèöó ıêğàíà
+  // Ğ¿Ñ€Ğ¾Ğ²ĞµÑ€ĞºĞ° Ğ²Ñ‹Ñ…Ğ¾Ğ´Ğ° Ğ·Ğ° Ğ»ĞµĞ²ÑƒÑ Ğ³Ñ€Ğ°Ğ½Ğ¸Ñ†Ñƒ ÑĞºÑ€Ğ°Ğ½Ğ°
   if (this->x - this->radius <= 0) {
     this->vx = 2;
   }
-  // ïğîâåğêà âûõîäà çà ïğàâóş ãğàíèöó ıêğàíà
+  // Ğ¿Ñ€Ğ¾Ğ²ĞµÑ€ĞºĞ° Ğ²Ñ‹Ñ…Ğ¾Ğ´Ğ° Ğ·Ğ° Ğ¿Ñ€Ğ°Ğ²ÑƒÑ Ğ³Ñ€Ğ°Ğ½Ğ¸Ñ†Ñƒ ÑĞºÑ€Ğ°Ğ½Ğ°
   else if (this->x + this->radius >= width) {
     this->vx = -2;
   }
-  // ïğîâåğêà âûõîäà çà âåğõíşş ãğàíèöó ıêğàíà
+  // Ğ¿Ñ€Ğ¾Ğ²ĞµÑ€ĞºĞ° Ğ²Ñ‹Ñ…Ğ¾Ğ´Ğ° Ğ·Ğ° Ğ²ĞµÑ€Ñ…Ğ½ÑÑ Ğ³Ñ€Ğ°Ğ½Ğ¸Ñ†Ñƒ ÑĞºÑ€Ğ°Ğ½Ğ°
   if (this->y - this->radius <= 0) {
     this->vy = 1;
   }
-  // ïğîâåğêà âûõîäà çà íèæíşş ãğàíèöó ıêğàíà
+  // Ğ¿Ñ€Ğ¾Ğ²ĞµÑ€ĞºĞ° Ğ²Ñ‹Ñ…Ğ¾Ğ´Ğ° Ğ·Ğ° Ğ½Ğ¸Ğ¶Ğ½ÑÑ Ğ³Ñ€Ğ°Ğ½Ğ¸Ñ†Ñƒ ÑĞºÑ€Ğ°Ğ½Ğ°
   else if (this->y + this->radius >= height) {
     this->vy = -1;
   }
@@ -40,3 +40,17 @@ void Ball::pong() {};
 void Ball::draw(sf::RenderWindow& window) {
     window.draw(circle);
 };
+
+bool Ball::touchedLeftSide() {
+  return this->x - this->radius <= 0;
+}
+
+bool Ball::touchedRightSide(const int width) {
+  return this->x + this->radius >= width;
+}
+
+void Ball::setPosition(int x, int y) {
+  this->x = x;
+  this->y = y;
+  this->circle.setPosition(sf::Vector2f(this->x - this->radius, this->y - this->radius));
+}
