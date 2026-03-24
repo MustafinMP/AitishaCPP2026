@@ -1,3 +1,6 @@
+﻿// SFMLApplication2.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
+//
+
 #include <SFML/Graphics.hpp>
 #include "Ball.h"
 #include "Racket.h"
@@ -17,8 +20,31 @@ int main() {
     while (const std::optional event = window.pollEvent()) {
       if (event->is<sf::Event::Closed>())
         window.close();
+      if (const auto* keypress = event->getIf<sf::Event::KeyPressed>()) {
+        if (keypress->code == sf::Keyboard::Key::Q) {
+          leftRacket.moveUp();
+        }
+        else if (keypress->code == sf::Keyboard::Key::A) {
+          leftRacket.moveDown();
+        }
+        else if (keypress->code == sf::Keyboard::Key::P) {
+          rightRacket.moveUp();
+        }
+        else if (keypress->code == sf::Keyboard::Key::L) {
+          rightRacket.moveDown();
+        }
+      }
     }
 
+    if (leftRacket.collideWithBall(ball)) {
+      ball.pongToRight();
+    }
+    if (rightRacket.collideWithBall(ball)) {
+      ball.pongToLeft();
+    }
+
+    leftRacket.update(height);
+    rightRacket.update(height);
     ball.move(width, height);
 
     window.clear();
@@ -28,3 +54,4 @@ int main() {
     window.display();
   }
 }
+

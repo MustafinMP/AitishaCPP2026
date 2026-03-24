@@ -13,19 +13,19 @@ Ball::Ball(int x, int y, int radius) {
 };
 
 void Ball::move(const int width, const int height) {
-  // Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð²Ñ‹Ñ…Ð¾Ð´Ð° Ð·Ð° Ð»ÐµÐ²ÑƒÑŽ Ð³Ñ€Ð°Ð½Ð¸Ñ†Ñƒ ÑÐºÑ€Ð°Ð½Ð°
+  // ïðîâåðêà âûõîäà çà ëåâóþ ãðàíèöó ýêðàíà
   if (this->x - this->radius <= 0) {
     this->vx = 2;
   }
-  // Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð²Ñ‹Ñ…Ð¾Ð´Ð° Ð·Ð° Ð¿Ñ€Ð°Ð²ÑƒÑŽ Ð³Ñ€Ð°Ð½Ð¸Ñ†Ñƒ ÑÐºÑ€Ð°Ð½Ð°
+  // ïðîâåðêà âûõîäà çà ïðàâóþ ãðàíèöó ýêðàíà
   else if (this->x + this->radius >= width) {
     this->vx = -2;
   }
-  // Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð²Ñ‹Ñ…Ð¾Ð´Ð° Ð·Ð° Ð²ÐµÑ€Ñ…Ð½ÑŽÑŽ Ð³Ñ€Ð°Ð½Ð¸Ñ†Ñƒ ÑÐºÑ€Ð°Ð½Ð°
+  // ïðîâåðêà âûõîäà çà âåðõíþþ ãðàíèöó ýêðàíà
   if (this->y - this->radius <= 0) {
     this->vy = 1;
   }
-  // Ð¿Ñ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð²Ñ‹Ñ…Ð¾Ð´Ð° Ð·Ð° Ð½Ð¸Ð¶Ð½ÑŽÑŽ Ð³Ñ€Ð°Ð½Ð¸Ñ†Ñƒ ÑÐºÑ€Ð°Ð½Ð°
+  // ïðîâåðêà âûõîäà çà íèæíþþ ãðàíèöó ýêðàíà
   else if (this->y + this->radius >= height) {
     this->vy = -1;
   }
@@ -35,7 +35,13 @@ void Ball::move(const int width, const int height) {
   this->circle.setPosition(sf::Vector2f(this->x - this->radius, this->y - this->radius));
 };
 
-void Ball::pong() {};
+void Ball::pongToLeft() {
+  this->vx = -2;
+};
+
+void Ball::pongToRight() {
+  this->vx = 2;
+};
 
 void Ball::draw(sf::RenderWindow& window) {
     window.draw(circle);
