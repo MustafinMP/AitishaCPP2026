@@ -1,13 +1,16 @@
-﻿//#include <SFML/Graphics.hpp>
+#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
+#include <string>
 
 using std::vector;
 using std::abs;
 
 const int width = 16;
 const int height = 16;
-const int scale = 30;
+const int scale = 50;
+
+sf::Font font;
 
 bool isValid(int x, int y) {
   return 0 <= x && x < width && 0 <= y && y < height;
@@ -101,8 +104,41 @@ public:
     return true;
   }
 
-  void draw() {
-    consoleDraw();
+  void draw(sf::RenderWindow& window) {
+    graphicsDraw(window);
+  }
+
+  void graphicsDraw(sf::RenderWindow& window) {
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        Cell cell = grid[y][x];
+        drawCell(window, cell, x, y);
+      }
+    }
+  }
+
+  void drawCell(sf::RenderWindow& window, Cell& cell, int x, int y) {
+    sf::RectangleShape rect;
+    rect.setSize(sf::Vector2f(scale, scale));
+    rect.setPosition(sf::Vector2f(x * scale, y * scale));
+    rect.setFillColor(sf::Color(120, 120, 120));
+    rect.setOutlineColor(sf::Color::Black);
+    rect.setOutlineThickness(2);
+    window.draw(rect);
+    if (cell.is_opened) {
+      sf::Text text(font, std::to_string(cell.neightbor_mines), scale);
+      text.setPosition(sf::Vector2f(x * scale, y * scale));
+      window.draw(text);
+    }
+    else if (cell.is_flagged) {
+      sf::CircleShape flag(scale / 2);
+      flag.setPosition(sf::Vector2f(x * scale, y * scale));
+      flag.setFillColor(sf::Color::Red);
+      window.draw(flag);
+    }
+    else {
+      rect.setFillColor(sf::Color(90, 90, 90));
+    }
   }
 
   void consoleDraw() {
@@ -124,23 +160,42 @@ public:
   }
 };
 
-/*
+
 int main() {
+  if (!font.openFromFile("consola.ttf")) {
+    return -1;
+  }
   sf::RenderWindow window(sf::VideoMode({ width * scale, height * scale }), "Game");
-  window.setFramerateLimit(1);
+  //window.setFramerateLimit(1);
+
+  Board board(15);
 
   while (window.isOpen()) {
     while (const std::optional event = window.pollEvent()) {
       if (event->is<sf::Event::Closed>())
         window.close();
+
+      if (const auto* mouseClick = event->getIf<sf::Event::MouseButtonPressed>()) {
+        int x = mouseClick->position.x / scale;
+        int y = mouseClick->position.y / scale;
+        if (mouseClick->button == sf::Mouse::Button::Left) {
+          board.open(x, y);
+        }
+
+        else if (mouseClick->button == sf::Mouse::Button::Right) {
+          board.toggleFlag(x, y);
+        }
+      }
     }
 
     window.clear();
+    // дописать проверку на найденную бомбу
+    board.draw(window);
     window.display();
   }
 }
-*/
 
+/*
 int main() {
   Board board(15);
   board.consoleDraw();
@@ -168,3 +223,5 @@ int main() {
     board.draw();
   }
 }
+
+*/
