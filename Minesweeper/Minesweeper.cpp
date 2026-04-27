@@ -6,8 +6,8 @@
 using std::vector;
 using std::abs;
 
-const int width = 16;
-const int height = 16;
+const int width = 25;
+const int height = 20;
 const int scale = 50;
 
 sf::Font font;
@@ -26,13 +26,16 @@ struct Cell {
 class Board {
 private:
   vector<vector<Cell>> grid;
+  int mines_count;
+  bool first_touch = true;
 
-  void placeMines(int minesCount) {
+  void placeMines(int minesCount, int start_x, int start_y) {
     int placed = 0;
     while (placed < minesCount) {
       int x = abs(rand()) % width;
       int y = abs(rand()) % height;
-      if (!grid[y][x].is_mine) {
+
+      if (!grid[y][x].is_mine and (abs(x - start_x) > 1 or abs(y - start_y) > 1)) {
         grid[y][x].is_mine = true;
         placed += 1;
       }
@@ -58,21 +61,29 @@ private:
     }
   }
 
-public:
-  Board(int mines) {
-    grid.resize(height, vector<Cell>(width));
-    placeMines(mines);
+  void createMines(int start_x, int start_y) {
+    placeMines(mines_count, start_x, start_y);
     countNeightbors();
   }
 
+public:
+  Board(int mines) {
+    grid.resize(height, vector<Cell>(width));
+    mines_count = mines;
+  }
+
   void toggleFlag(int x, int y) {
-    if (isValid(x, y) && !grid[y][x].is_opened) {
+    if (isValid(x, y) && !grid[y][x].is_opened && !first_touch) {
       grid[y][x].is_flagged = !grid[y][x].is_flagged;
     }
   }
 
   void open(int x, int y) {
     if (isValid(x, y) && !grid[y][x].is_opened && !grid[y][x].is_flagged) {
+      if (first_touch) {
+        createMines(x, y);
+        first_touch = false;
+      }
       grid[y][x].is_opened = true;
 
       if (grid[y][x].neightbor_mines == 0) {
@@ -168,7 +179,7 @@ int main() {
   sf::RenderWindow window(sf::VideoMode({ width * scale, height * scale }), "Game");
   //window.setFramerateLimit(1);
 
-  Board board(15);
+  Board board(110);
 
   while (window.isOpen()) {
     while (const std::optional event = window.pollEvent()) {
@@ -187,41 +198,24 @@ int main() {
         }
       }
     }
-
+    
     window.clear();
-    // дописать проверку на найденную бомбу
-    board.draw(window);
+
+    if (board.isGameOver()) {
+      sf::RectangleShape rect;
+      rect.setSize(sf::Vector2f(width * scale, height * scale));
+      rect.setFillColor(sf::Color::Red);
+      window.draw(rect);
+    }
+    else if (board.isWin()) {
+      sf::RectangleShape rect;
+      rect.setSize(sf::Vector2f(width * scale, height * scale));
+      rect.setFillColor(sf::Color::Green);
+      window.draw(rect);
+    }
+    else {
+      board.draw(window);
+    }
     window.display();
   }
 }
-
-/*
-int main() {
-  Board board(15);
-  board.consoleDraw();
-  while (true) {
-    std::string command;
-    int x, y;
-    std::cout << "Enter command >>";
-    std::cin >> command;
-    std::cin >> x;
-    std::cin >> y;
-    if (command == "open") {
-      board.open(x, y);
-    }
-    else if (command == "flag") {
-      board.toggleFlag(x, y);
-    }
-    if (board.isGameOver()) {
-      std::cout << "You lose!";
-      break;
-    }
-    if (board.isWin()) {
-      std::cout << "You win!";
-      break;
-    }
-    board.draw();
-  }
-}
-
-*/
