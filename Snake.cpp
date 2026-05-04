@@ -10,8 +10,8 @@ using std::abs;
 using std::deque;
 using std::string;
 
-const int width = 25;
-const int height = 20;
+const int width = 18;
+const int height = 18;
 const int scale = 50;
 
 bool isValid(int x, int y) {
@@ -29,6 +29,7 @@ private:
   Point food;
   int dx, dy;
   bool gameOver = false;
+  bool dirEdited = false;
 
   void createFood() {
     while (true) {
@@ -46,6 +47,7 @@ private:
       if (!onSnake) {
         food = { x, y };
         break;
+        std::cout << "Food was created " << x << ' ' << y << std::endl;
       }
     }
   }
@@ -63,21 +65,28 @@ public:
   }
 
   void handleInput(sf::Keyboard::Key key) {
+    if (dirEdited) {
+      return;
+    }
     if (key == sf::Keyboard::Key::Up && dy != 1) {
       dx = 0;
       dy = -1;
+      dirEdited = true;
     }
     else if (key == sf::Keyboard::Key::Down && dy != -1) {
       dx = 0;
       dy = 1;
+      dirEdited = true;
     }
     else if (key == sf::Keyboard::Key::Right && dx != -1) {
       dx = 1;
       dy = 0;
+      dirEdited = true;
     }
     else if (key == sf::Keyboard::Key::Left && dx != 1) {
       dx = -1;
       dy = 0;
+      dirEdited = true;
     }
   }
 
@@ -98,7 +107,7 @@ public:
 
     for (int i = 0; i < snake.size() - 1; i++) {
       if (next_x == snake[i].x and next_y == snake[i].y) {
-        std::cout << "You lose!";
+        std::cout << "You lose!!!";
         gameOver = true;
         return;
       }
@@ -115,6 +124,7 @@ public:
     else {
       snake.pop_back();
     }
+    dirEdited = false;
   }
 
   void draw(sf::RenderWindow& window) {
@@ -130,7 +140,7 @@ public:
           sf::RectangleShape rect;
           rect.setSize(sf::Vector2f(scale, scale));
           rect.setPosition(sf::Vector2f(x * scale, y * scale));
-          rect.setFillColor(sf::Color::Green);
+          rect.setFillColor(sf::Color(0, 200, 0));
           rect.setOutlineColor(sf::Color::White);
           rect.setOutlineThickness(1);
           window.draw(rect);
