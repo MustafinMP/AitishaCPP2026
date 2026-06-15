@@ -108,10 +108,50 @@ public:
   Shape(char type, int x, int y, int rotation, int colorId) : type(type), x(x), y(y), rotation(rotation), colorId(colorId) {
     this->masks = getShapeMask(this->type);
   };
+
   void move() {
     y += 1;
   };
-  void rotate() {};
+
+  void moveToRight(vector<vector<int>>& field) {
+    bool canMove = true;
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        if (masks[rotation][i][j] != 0) {
+          if (x + j == width - 1) {
+            canMove = false;
+          }
+          else if (field[y + i][x + j + 1] != 0) {
+            canMove = false;
+          }
+        }
+      }
+    }
+    if (canMove) {
+      x += 1;
+    }
+  }
+
+  void moveToLeft(vector<vector<int>>& field) {
+    bool canMove = true;
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        if (masks[rotation][i][j] != 0) {
+          if (x + j == 0) {
+            canMove = false;
+          }
+          else if (field[y + i][x + j - 1] != 0) {
+            canMove = false;
+          }
+        }
+      }
+    }
+    if (canMove) {
+      x -= 1;
+    }
+  }
+
+  void rotate() {};  // тут будет вращение фигур
 
   bool onBottom() {
     for (int sy = 0; sy < 4; sy++) {
@@ -124,7 +164,7 @@ public:
     return false;
   }
 
-  void addToField(vector<vector<int>>& field) {
+  void addToField(vector<vector<int>>& field) {  // !
     for (int sy = 0; sy < 4; sy++) {
       for (int sx = 0; sx < 4; sx++) {
         if (masks[rotation][sy][sx]) {
@@ -132,6 +172,20 @@ public:
         }
       }
     }
+  }
+
+  bool canMove(vector<vector<int>>& field) {
+    if (onBottom()) {
+      return false;
+    }
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < 4; j++) {
+        if (masks[rotation][i][j] != 0 && field[y + i + 1][x + j] != 0) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   void draw(sf::RenderWindow& window) {
@@ -142,13 +196,10 @@ public:
         rect.setPosition(sf::Vector2f((sx + x) * scale, (sy + y) * scale));
         if (masks[rotation][sy][sx]) {
           rect.setFillColor(getColor(colorId));
+          rect.setOutlineColor(Color::White);
+          rect.setOutlineThickness(1);
+          window.draw(rect);
         }
-        else {
-          rect.setFillColor(Color::Black);
-        }
-        rect.setOutlineColor(Color::White);
-        rect.setOutlineThickness(1);
-        window.draw(rect);
       }
     }
   }
@@ -173,10 +224,26 @@ public:
     nextShape = Shape();
   };
 
-  void handleKeyboard() {};
+  void handleKeyboard(sf::Keyboard::Key key) {
+    if (key == sf::Keyboard::Key::Right) {
+      currentShape.moveToRight(field);
+    }
+    else if (key == sf::Keyboard::Key::Left) {
+      currentShape.moveToLeft(field);
+    }
+    // тут будет вращение
+  };
 
   bool move() {
-    currentShape.move();
+    if (currentShape.canMove(field)) {
+        currentShape.move();
+    }
+    else {
+      currentShape.addToField(field);
+      checkRows();
+      createNewShape();
+      return true;
+    }
     if (currentShape.onBottom()) {
       currentShape.addToField(field);
       checkRows();
@@ -186,9 +253,17 @@ public:
     return false;
   };
 
-  void rotate() {};
-  bool collided() {};
-  bool isFinished() {};
+  bool isFinished() {
+    for (int y = 0; y < 4; y++) {
+      for (int x = 0; x < width; x++) {
+        if (field[y][x] != 0) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
   void checkRows() {};
 
   void draw(sf::RenderWindow& window) {
@@ -222,7 +297,7 @@ int main() {
   srand(time(nullptr));
   bool touched = false;
   sf::RenderWindow window(sf::VideoMode({ (width + 6) * scale, height * scale }), "Game");
-  window.setFramerateLimit(1);
+  window.setFramerateLimit(5);
 
   Tetris tetris;
 
@@ -231,9 +306,15 @@ int main() {
       if (event->is<sf::Event::Closed>())
         window.close();
 
-      if (const auto* keypress = event->getIf<sf::Event::KeyPressed>()) {}
+      if (const auto* keypress = event->getIf<sf::Event::KeyPressed>()) {
+        tetris.handleKeyboard(keypress->code);
+      }
     };
     touched = tetris.move();
+    if (touched and tetris.isFinished()) {
+      std::cout << "Game is finished!!!";
+      window.close();
+    }
 
     window.clear();
     tetris.draw(window);
